@@ -1,0 +1,27 @@
+name: Send a Discord message when new Youtube videos update
+on:
+  youtube:
+    channel_id:
+      - UChXDq9Izwq-pTzeUWzwXL3A
+jobs:
+  discord:
+    name: Send a message to discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare message
+        id: prepare
+        run: |
+          TITLE="${{on.youtube.outputs.title}}"
+          # Replace ' and " with escaped versions
+          ESCAPED_TITLE=$(echo "$TITLE" | sed "s/'/\\\'/g" | sed 's/"/\\"/g')
+          echo "Escaped title: $ESCAPED_TITLE"
+          echo "::set-output name=escaped_title::$ESCAPED_TITLE"
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: ${{ secrets.DISCORD_USERNAME_GYUMCHOI }}
+          DISCORD_AVATAR: ${{ secrets.DISCORD_AVATAR_GYUMCHOI }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "`다이어트 과학자 최겸 Gyum Choi - YouTube`'\n'**${{steps.prepare.outputs.escaped_title}}**'\n'${{on.youtube.outputs.link}}"
+          
